@@ -8,10 +8,11 @@ class DashboardController {
             // Get total counts for main entities
             const statsQuery = `
                 SELECT 
-                    (SELECT COUNT(*) FROM Contact) as contacts,
-                    (SELECT COUNT(*) FROM Organization) as organizations,
-                    (SELECT COUNT(*) FROM Project) as projects,
-                    (SELECT COUNT(*) FROM [User]) as users
+                    (SELECT COUNT(*) FROM contact) as contacts,
+                    (SELECT COUNT(*) FROM organization) as organizations,
+                    (SELECT COUNT(*) FROM project) as projects,
+                    (SELECT COUNT(*) FROM systemuser) as users,
+                    (SELECT COUNT(*) FROM BaseEntity WHERE logicalname = 'tasktask') as tasks
             `;
             const statsResult = await pool.request().query(statsQuery);
             const counts = statsResult.recordset[0];
@@ -31,7 +32,8 @@ class DashboardController {
                         contacts: counts.contacts,
                         organizations: counts.organizations,
                         projects: counts.projects,
-                        users: counts.users
+                        users: counts.users,
+                        tasks: counts.tasks
                     },
                     recentActivity: activityResult.recordset
                 }
