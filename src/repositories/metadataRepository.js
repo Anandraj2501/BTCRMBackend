@@ -86,6 +86,75 @@ class MetadataRepository extends IMetadataRepository {
             .input('RelationshipType', sql.NVarChar(50), lookupData.relationshiptype || 'OneToMany')
             .execute('sp_CreateLookup');
     }
+
+    async updateEntity(logicalName, updateData) {
+        const pool = await poolPromise;
+        const updateFields = [];
+        const request = pool.request();
+
+        if (updateData.displayname) {
+            updateFields.push('displayname = @displayname');
+            request.input('displayname', sql.NVarChar(100), updateData.displayname);
+        }
+        if (updateData.schemaname) {
+            updateFields.push('schemaname = @schemaname');
+            request.input('schemaname', sql.NVarChar(100), updateData.schemaname);
+        }
+        if (updateData.primaryidattribute) {
+            updateFields.push('primaryidattribute = @primaryidattribute');
+            request.input('primaryidattribute', sql.NVarChar(100), updateData.primaryidattribute);
+        }
+        if (updateData.primarynameattribute) {
+            updateFields.push('primarynameattribute = @primarynameattribute');
+            request.input('primarynameattribute', sql.NVarChar(100), updateData.primarynameattribute);
+        }
+        if (updateData.isactivity !== undefined) {
+            updateFields.push('isactivity = @isactivity');
+            request.input('isactivity', sql.Bit, updateData.isactivity);
+        }
+
+        if (updateFields.length === 0) return;
+
+        const query = `UPDATE EntityMetadata SET ${updateFields.join(', ')}, modifiedon = GETDATE() WHERE logicalname = @logicalname`;
+        request.input('logicalname', sql.NVarChar(100), logicalName);
+
+        await request.query(query);
+    }
+
+    async updateAttribute(entityLogicalName, attributeLogicalName, updateData) {
+        const pool = await poolPromise;
+        const updateFields = [];
+        const request = pool.request();
+
+        if (updateData.displayname) {
+            updateFields.push('displayname = @displayname');
+            request.input('displayname', sql.NVarChar(100), updateData.displayname);
+        }
+        if (updateData.schemaname) {
+            updateFields.push('schemaname = @schemaname');
+            request.input('schemaname', sql.NVarChar(100), updateData.schemaname);
+        }
+        if (updateData.attributetype) {
+            updateFields.push('attributetype = @attributetype');
+            request.input('attributetype', sql.NVarChar(50), updateData.attributetype);
+        }
+        if (updateData.maxlength !== undefined) {
+            updateFields.push('maxlength = @maxlength');
+            request.input('maxlength', sql.Int, updateData.maxlength);
+        }
+        if (updateData.isnullable !== undefined) {
+            updateFields.push('isnullable = @isnullable');
+            request.input('isnullable', sql.Bit, updateData.isnullable);
+        }
+
+        if (updateFields.length === 0) return;
+
+        const query = `UPDATE AttributeMetadata SET ${updateFields.join(', ')} WHERE entityid = (SELECT entityid FROM EntityMetadata WHERE logicalname = @entitylogicalname) AND logicalname = @attributelogicalname`;
+        request.input('entitylogicalname', sql.NVarChar(100), entityLogicalName);
+        request.input('attributelogicalname', sql.NVarChar(100), attributeLogicalName);
+
+        await request.query(query);
+    }
 }
 
 module.exports = new MetadataRepository();

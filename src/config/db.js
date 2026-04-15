@@ -1,7 +1,7 @@
 require('dotenv').config();
 const sql = require('mssql/msnodesqlv8'); // Use msnodesqlv8 driver
 
-const connectionString = 'Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=MiniCRM;Trusted_Connection=yes;TrustServerCertificate=yes;';
+const connectionString = 'Driver={ODBC Driver 18 for SQL Server};Server=localhost\\SQLEXPRESS;Database=MiniCRM;Trusted_Connection=yes;TrustServerCertificate=yes;';
 
 const poolPromise = new sql.ConnectionPool({ connectionString })
   .connect()

@@ -20,6 +20,16 @@ class MetadataService extends IMetadataService {
         metadataCache.invalidateEntity(lookupData.entitylogicalname);
     }
 
+    async updateEntity(logicalName, updateData) {
+        await metadataRepository.updateEntity(logicalName, updateData);
+        metadataCache.invalidateEntity(logicalName);
+    }
+
+    async updateAttribute(entityLogicalName, attributeLogicalName, updateData) {
+        await metadataRepository.updateAttribute(entityLogicalName, attributeLogicalName, updateData);
+        metadataCache.invalidateEntity(entityLogicalName);
+    }
+
     async getEntityDefinition(logicalName) {
         let cached = metadataCache.getEntityMap(logicalName);
         if (cached) return cached;
@@ -49,6 +59,11 @@ class MetadataService extends IMetadataService {
 
     async getAllEntities() {
         return await metadataRepository.getAllEntitiesMetadata();
+    }
+
+    async deleteEntity(logicalname) {
+        metadataCache.invalidateEntity(logicalname);
+        await metadataRepository.deleteEntityByLogicalName(logicalname);
     }
 }
 

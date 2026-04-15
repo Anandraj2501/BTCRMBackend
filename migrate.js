@@ -2,7 +2,7 @@ const sql = require('mssql/msnodesqlv8');
 const fs = require('fs');
 const path = require('path');
 
-const connectionString = 'Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=MiniCRM;Trusted_Connection=yes;TrustServerCertificate=yes;';
+const connectionString = 'Driver={ODBC Driver 18 for SQL Server};Server=localhost\\SQLEXPRESS;Database=MiniCRM;Trusted_Connection=yes;TrustServerCertificate=yes;';
 
 async function runMigrations() {
     let pool;
@@ -30,7 +30,11 @@ async function runMigrations() {
         }
         console.log('\nAll migrations completed successfully!');
     } catch (err) {
-        console.error('Migration failed:', err.message);
+        console.error('Migration failed:');
+        console.error('message:', err?.message || err);
+        if (err?.code) console.error('code:', err.code);
+        if (err?.originalError) console.error('originalError:', err.originalError);
+        if (err?.precedingErrors?.length) console.error('precedingErrors:', err.precedingErrors);
         process.exit(1);
     } finally {
         if (pool) await pool.close();

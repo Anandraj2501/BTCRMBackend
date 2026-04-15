@@ -29,14 +29,14 @@ class SchemaController {
 
     async getForms(req, res, next) {
         try {
-            const data = await formService.getFormsForEntity(req.params.logicalname);
+            const data = await formService.getFormsForEntity(req.params.logicalname, req.query.appId || null);
             res.json(ApiResponse.success(null, data));
         } catch (err) { next(err); }
     }
 
     async getDefaultForm(req, res, next) {
         try {
-            const data = await formService.getDefaultForm(req.params.logicalname);
+            const data = await formService.getDefaultForm(req.params.logicalname, req.query.appId || null);
             res.json(ApiResponse.success(null, data));
         } catch (err) { next(err); }
     }
@@ -51,14 +51,14 @@ class SchemaController {
 
     async getViews(req, res, next) {
         try {
-            const data = await viewService.getViewsForEntity(req.params.logicalname);
+            const data = await viewService.getViewsForEntity(req.params.logicalname, req.query.appId || null);
             res.json(ApiResponse.success(null, data));
         } catch (err) { next(err); }
     }
 
     async getDefaultView(req, res, next) {
         try {
-            const data = await viewService.getDefaultView(req.params.logicalname);
+            const data = await viewService.getDefaultView(req.params.logicalname, req.query.appId || null);
             res.json(ApiResponse.success(null, data));
         } catch (err) { next(err); }
     }

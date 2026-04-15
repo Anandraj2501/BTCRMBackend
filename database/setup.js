@@ -3,11 +3,11 @@ const fs = require('fs');
 const path = require('path');
 
 const masterConfig = {
-    connectionString: 'Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=master;Trusted_Connection=yes;TrustServerCertificate=yes;'
+    connectionString: 'Driver={ODBC Driver 18 for SQL Server};Server=localhost\\SQLEXPRESS;Database=master;Trusted_Connection=yes;TrustServerCertificate=yes;'
 };
 
 const crmConfig = {
-    connectionString: 'Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=MiniCRM;Trusted_Connection=yes;TrustServerCertificate=yes;'
+    connectionString: 'Driver={ODBC Driver 18 for SQL Server};Server=localhost\\SQLEXPRESS;Database=MiniCRM;Trusted_Connection=yes;TrustServerCertificate=yes;'
 };
 
 const setupDb = async () => {

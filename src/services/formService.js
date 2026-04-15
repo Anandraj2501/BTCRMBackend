@@ -8,12 +8,12 @@ class FormService {
         return await formRepository.saveForm(data);
     }
 
-    async getFormsForEntity(logicalName) {
-        return await formRepository.getFormsForEntity(logicalName);
+    async getFormsForEntity(logicalName, appId = null) {
+        return await formRepository.getFormsForEntity(logicalName, appId);
     }
 
-    async getDefaultForm(logicalName) {
-        return await formRepository.getDefaultForm(logicalName);
+    async getDefaultForm(logicalName, appId = null) {
+        return await formRepository.getDefaultForm(logicalName, appId);
     }
 }
 

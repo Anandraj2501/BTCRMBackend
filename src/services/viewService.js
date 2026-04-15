@@ -8,12 +8,12 @@ class ViewService {
         return await viewRepository.saveView(data);
     }
 
-    async getViewsForEntity(logicalName) {
-        return await viewRepository.getViewsForEntity(logicalName);
+    async getViewsForEntity(logicalName, appId = null) {
+        return await viewRepository.getViewsForEntity(logicalName, appId);
     }
 
-    async getDefaultView(logicalName) {
-        return await viewRepository.getDefaultView(logicalName);
+    async getDefaultView(logicalName, appId = null) {
+        return await viewRepository.getDefaultView(logicalName, appId);
     }
 }
 
