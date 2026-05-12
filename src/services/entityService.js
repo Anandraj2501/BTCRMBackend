@@ -3,6 +3,7 @@ const entityRepository = require('../repositories/entityRepository');
 const metadataService = require('./metadataService');
 const NotFoundException = require('../exceptions/NotFoundException');
 const ValidationException = require('../exceptions/ValidationException');
+const { isGuid, requireGuid } = require('../utils/guid');
 
 class EntityService extends IEntityService {
     async validateMetadata(logicalName, data) {
@@ -17,6 +18,10 @@ class EntityService extends IEntityService {
             }
 
             if (attrMeta.attributetype === 'Lookup' || attrMeta.attributetype === 'Uniqueidentifier') {
+                if (data[key] && !isGuid(data[key])) {
+                    throw new ValidationException(`Attribute '${key}' must be a valid GUID.`);
+                }
+
                 const lookupMetaList = def.lookups.filter(l => l.attributeid === attrMeta.attributeid);
                 if (lookupMetaList.length > 0) {
                     const targetId = data[key];
@@ -35,6 +40,12 @@ class EntityService extends IEntityService {
     }
 
     async createRecord(logicalName, data) {
+        if (String(logicalName || '').toLowerCase() === 'cases') {
+            const caseService = require('./caseService');
+            const record = await caseService.createCase(data);
+            return { ...record, id: record.caseId };
+        }
+
         const def = await this.validateMetadata(logicalName, data);
         const hasBaseEntity = def.metadata.iscustomentity === 1 || def.attributeMap['baseentityid'] !== undefined;
         return await entityRepository.createRecord(logicalName, data, def.metadata.primaryidattribute, hasBaseEntity);
@@ -47,6 +58,7 @@ class EntityService extends IEntityService {
     }
 
     async getRecordById(logicalName, id) {
+        id = requireGuid(id, 'Record id');
         const def = await metadataService.getEntityDefinition(logicalName);
         const hasBaseEntity = def.metadata.iscustomentity === 1 || def.attributeMap['baseentityid'] !== undefined;
         
@@ -56,6 +68,7 @@ class EntityService extends IEntityService {
     }
 
     async updateRecord(logicalName, id, data) {
+        id = requireGuid(id, 'Record id');
         const def = await this.validateMetadata(logicalName, data);
         const hasBaseEntity = def.metadata.iscustomentity === 1 || def.attributeMap['baseentityid'] !== undefined;
         
@@ -72,6 +85,7 @@ class EntityService extends IEntityService {
     }
 
     async deleteRecord(logicalName, id) {
+        id = requireGuid(id, 'Record id');
         const def = await metadataService.getEntityDefinition(logicalName);
         const hasBaseEntity = def.metadata.iscustomentity === 1 || def.attributeMap['baseentityid'] !== undefined;
 
@@ -91,6 +105,7 @@ class EntityService extends IEntityService {
     }
 
     async getRecordsByView(logicalName, viewId) {
+        viewId = requireGuid(viewId, 'View id');
         const viewRepository = require('../repositories/viewRepository');
         const view = await viewRepository.getViewById(viewId);
         if (!view) throw new (require('../exceptions/NotFoundException'))(`View ${viewId} not found`);

@@ -91,6 +91,13 @@ class MetadataController {
         } catch (error) { next(error); }
     }
 
+    async deleteEntity(req, res, next) {
+        try {
+            await metadataService.deleteEntity(req.params.logicalname);
+            res.status(200).json(ApiResponse.success(`Entity '${req.params.logicalname}' deleted successfully.`));
+        } catch (error) { next(error); }
+    }
+
     // ─── Option Sets ──────────────────────────────────────────────────────────
     async createOptionSet(req, res, next) {
         try {

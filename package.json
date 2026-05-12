@@ -5,7 +5,8 @@
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
+    "dev": "nodemon src/app.js",
+    "test": "node test/accountValidator.test.js && node test/contactValidator.test.js"
   },
   "dependencies": {
     "body-parser": "^1.20.2",

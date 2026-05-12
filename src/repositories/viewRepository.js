@@ -110,6 +110,18 @@ class ViewRepository {
             `);
         return result.recordset.map((row) => ({ ...row, definition: JSON.parse(row.definitionjson) }));
     }
+
+    async listAllViews() {
+        await ensureAppMetadataSchema();
+        const pool = await poolPromise;
+        const result = await pool.request().query(`
+            SELECT v.*, e.logicalname AS entitylogicalname
+            FROM ViewMetadata v
+            JOIN EntityMetadata e ON v.entityid = e.entityid
+            ORDER BY v.modifiedon DESC, v.createdon DESC
+        `);
+        return result.recordset.map((row) => ({ ...row, definition: JSON.parse(row.definitionjson) }));
+    }
 }
 
 module.exports = new ViewRepository();

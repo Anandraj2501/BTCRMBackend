@@ -1,0 +1,278 @@
+{
+  "solutions": [
+    {
+      "id": "8e5b5f5b-5af8-4ea6-8d30-34d5d865d101",
+      "displayName": "Demo",
+      "uniqueName": "Demo",
+      "version": "1.0.0.0",
+      "publisher": "Bluethinkinc_Org",
+      "createdOn": "2026-04-01T09:00:00.000Z",
+      "isManaged": false
+    },
+    {
+      "id": "22969cbe-bb70-46be-8a08-17f8346dd102",
+      "displayName": "Admission",
+      "uniqueName": "Admission",
+      "version": "1.0.0.0",
+      "publisher": "Pranay",
+      "createdOn": "2026-03-24T14:20:00.000Z",
+      "isManaged": false
+    },
+    {
+      "id": "f1656896-63f1-42b4-9ca4-e1df7c79c103",
+      "displayName": "Payment",
+      "uniqueName": "Payment",
+      "version": "1.0.0.0",
+      "publisher": "Bluethinkinc_Org",
+      "createdOn": "2026-02-18T11:45:00.000Z",
+      "isManaged": true
+    },
+    {
+      "id": "853ea014-e0fa-4e5f-88e8-d4be41cca3ee",
+      "displayName": "first Sol",
+      "uniqueName": "fs",
+      "version": "1.0.0.0",
+      "publisher": "Default Publisher",
+      "createdOn": "2026-04-16T09:07:02.510Z",
+      "isManaged": false
+    },
+    {
+      "id": "04c6b2f6-2033-4f49-a3a1-2fded5c543af",
+      "displayName": "s",
+      "uniqueName": "s",
+      "version": "1.0.0.0",
+      "publisher": "Default Publisher",
+      "createdOn": "2026-04-16T09:07:28.305Z",
+      "isManaged": false
+    },
+    {
+      "id": "38c974ac-c54a-4c01-9b6e-eb3bc07a0952",
+      "displayName": "D",
+      "uniqueName": "D",
+      "version": "1.0.0.0",
+      "publisher": "Default Publisher",
+      "createdOn": "2026-04-16T10:13:21.526Z",
+      "isManaged": false
+    },
+    {
+      "id": "c679e513-cc55-49bb-b7d7-862cf805fe22",
+      "displayName": "asdf",
+      "uniqueName": "a",
+      "version": "1.0.0.0",
+      "publisher": "Default Publisher",
+      "createdOn": "2026-04-16T10:45:44.997Z",
+      "isManaged": false
+    }
+  ],
+  "components": [
+    {
+      "id": "dcb7c6fb-6c17-4f5d-b52a-ff8b7515c201",
+      "type": "Table",
+      "name": "Account",
+      "metadata": {
+        "columns": [
+          "name",
+          "email",
+          "phone"
+        ],
+        "owner": "Satyam Kumar",
+        "status": "Published",
+        "customized": "Yes",
+        "lastModified": "Apr 14, 2026 09:20"
+      }
+    },
+    {
+      "id": "35b3cba8-7f44-4c85-8848-14dc40f9b202",
+      "type": "Table",
+      "name": "Contact",
+      "metadata": {
+        "columns": [
+          "firstname",
+          "lastname",
+          "email"
+        ],
+        "owner": "Satyam Kumar",
+        "status": "Published",
+        "customized": "Yes",
+        "lastModified": "Apr 13, 2026 17:05"
+      }
+    },
+    {
+      "id": "4a926f2e-26fd-43f6-8047-f8de9c23e203",
+      "type": "Cloud flow",
+      "name": "Lead Qualification",
+      "metadata": {
+        "owner": "Automations Team",
+        "status": "Draft",
+        "customized": "No",
+        "lastModified": "Apr 12, 2026 15:10"
+      }
+    },
+    {
+      "id": "b55f15cb-72d7-4d6d-ab88-f9c14c06f204",
+      "type": "App",
+      "name": "Field Sales",
+      "metadata": {
+        "owner": "CRM Admin",
+        "status": "Published",
+        "customized": "Yes",
+        "lastModified": "Apr 11, 2026 11:40"
+      }
+    },
+    {
+      "id": "d7b0d0ef-e643-4d5a-9b87-0de0c6d7f205",
+      "type": "Site map",
+      "name": "Main Site Map",
+      "metadata": {
+        "owner": "CRM Admin",
+        "status": "Published",
+        "customized": "Yes",
+        "lastModified": "Apr 10, 2026 08:25"
+      }
+    },
+    {
+      "id": "140e11d1-7b03-4980-ad7f-b1fa3ed36206",
+      "type": "Agent",
+      "name": "Support Agent",
+      "metadata": {
+        "owner": "AI Ops",
+        "status": "Ready",
+        "customized": "No",
+        "lastModified": "Apr 09, 2026 13:45"
+      }
+    },
+    {
+      "id": "87f554e1-7ec4-4f9d-916a-a0d2d0ef2207",
+      "type": "Card",
+      "name": "Opportunity Score Card",
+      "metadata": {
+        "owner": "Sales Ops",
+        "status": "Published",
+        "customized": "Yes",
+        "lastModified": "Apr 08, 2026 16:30"
+      }
+    },
+    {
+      "id": "df792db4-b0a7-4746-ab2e-3e93e94ab208",
+      "type": "Data workspace",
+      "name": "Customer Workspace",
+      "metadata": {
+        "owner": "Data Team",
+        "status": "Published",
+        "customized": "No",
+        "lastModified": "Apr 08, 2026 10:18"
+      }
+    },
+    {
+      "id": "53ff8b1f-fbe6-42e1-9316-c3cfbb021209",
+      "type": "Table",
+      "name": "Quote",
+      "metadata": {
+        "columns": [
+          "quoteid",
+          "name",
+          "amount"
+        ],
+        "owner": "Platform Team",
+        "status": "Managed",
+        "customized": "No",
+        "lastModified": "Apr 07, 2026 14:02"
+      }
+    },
+    {
+      "id": "e249ff42-1189-4bb8-ab47-e4f778da2210",
+      "type": "App",
+      "name": "Order App",
+      "metadata": {
+        "owner": "Platform Team",
+        "status": "Managed",
+        "customized": "No",
+        "lastModified": "Apr 06, 2026 09:02"
+      }
+    },
+    {
+      "id": "87bade88-2820-4260-8e51-2bcdacdf835c",
+      "type": "App",
+      "name": "k",
+      "metadata": {
+        "owner": "System",
+        "status": "Draft",
+        "customized": "No"
+      }
+    }
+  ],
+  "solutionComponents": [
+    {
+      "id": "9591d1c1-a7c3-4cb5-a815-af10221ac301",
+      "solutionId": "8e5b5f5b-5af8-4ea6-8d30-34d5d865d101",
+      "componentId": "dcb7c6fb-6c17-4f5d-b52a-ff8b7515c201",
+      "type": "Table",
+      "addedOn": "2026-04-01T09:10:00.000Z",
+      "isExisting": true
+    },
+    {
+      "id": "7be516d6-6f80-4f92-807e-53af14f29302",
+      "solutionId": "8e5b5f5b-5af8-4ea6-8d30-34d5d865d101",
+      "componentId": "35b3cba8-7f44-4c85-8848-14dc40f9b202",
+      "type": "Table",
+      "addedOn": "2026-04-01T09:11:00.000Z",
+      "isExisting": true
+    },
+    {
+      "id": "56fc98d3-e884-4bcc-907d-f7714a0db303",
+      "solutionId": "8e5b5f5b-5af8-4ea6-8d30-34d5d865d101",
+      "componentId": "4a926f2e-26fd-43f6-8047-f8de9c23e203",
+      "type": "Cloud flow",
+      "addedOn": "2026-04-01T09:12:00.000Z",
+      "isExisting": true
+    },
+    {
+      "id": "d1ae44d1-c91c-4f2f-b62d-3e411d307304",
+      "solutionId": "8e5b5f5b-5af8-4ea6-8d30-34d5d865d101",
+      "componentId": "b55f15cb-72d7-4d6d-ab88-f9c14c06f204",
+      "type": "App",
+      "addedOn": "2026-04-01T09:13:00.000Z",
+      "isExisting": true
+    },
+    {
+      "id": "1dcd9636-8ff7-4691-9919-a24cd8e8aa05",
+      "solutionId": "22969cbe-bb70-46be-8a08-17f8346dd102",
+      "componentId": "d7b0d0ef-e643-4d5a-9b87-0de0c6d7f205",
+      "type": "Site map",
+      "addedOn": "2026-03-24T14:25:00.000Z",
+      "isExisting": false
+    },
+    {
+      "id": "b5cfd54a-85e6-468e-8c76-c0def261bd06",
+      "solutionId": "22969cbe-bb70-46be-8a08-17f8346dd102",
+      "componentId": "140e11d1-7b03-4980-ad7f-b1fa3ed36206",
+      "type": "Agent",
+      "addedOn": "2026-03-24T14:27:00.000Z",
+      "isExisting": true
+    },
+    {
+      "id": "5331e726-7f61-467d-bafc-e3a627c6f007",
+      "solutionId": "f1656896-63f1-42b4-9ca4-e1df7c79c103",
+      "componentId": "53ff8b1f-fbe6-42e1-9316-c3cfbb021209",
+      "type": "Table",
+      "addedOn": "2026-02-18T11:50:00.000Z",
+      "isExisting": true
+    },
+    {
+      "id": "df4f2dbc-0fa0-4566-8c70-1a7d16040f08",
+      "solutionId": "f1656896-63f1-42b4-9ca4-e1df7c79c103",
+      "componentId": "e249ff42-1189-4bb8-ab47-e4f778da2210",
+      "type": "App",
+      "addedOn": "2026-02-18T11:55:00.000Z",
+      "isExisting": true
+    },
+    {
+      "id": "58a913cb-82dd-494f-89b9-7463edff324c",
+      "solutionId": "8e5b5f5b-5af8-4ea6-8d30-34d5d865d101",
+      "componentId": "87bade88-2820-4260-8e51-2bcdacdf835c",
+      "type": "App",
+      "addedOn": "2026-04-16T10:45:32.856Z",
+      "isExisting": false
+    }
+  ]
+}

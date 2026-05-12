@@ -1,0 +1,6 @@
+
+> metadata-crm-platform@1.0.0 start
+> node src/app.js
+
+Connected to SQL Server
+CRM Platform Engine running on port 3001

@@ -5,6 +5,7 @@ const { poolPromise } = require('../config/db');
 const migrationFiles = [
     path.join(__dirname, '../../database/migrations/001_add_relationship_form_view_tables.sql'),
     path.join(__dirname, '../../database/migrations/005_app_metadata_and_app_scoped_artifacts.sql'),
+    path.join(__dirname, '../../database/migrations/006_solution_storage.sql'),
 ];
 let ensureSchemaPromise = null;
 

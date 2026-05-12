@@ -14,6 +14,7 @@ router.get('/entity', metadataController.getAllEntities);
 router.get('/entity/:logicalname', metadataController.getEntityDefinition);
 router.post('/entity', metadataController.createEntity);
 router.patch('/entity/:logicalname', metadataController.updateEntity);
+router.delete('/entity/:logicalname', metadataController.deleteEntity);
 
 // ─── Attributes ───────────────────────────────────────────────────────────────
 router.post('/attribute', metadataController.createAttribute);

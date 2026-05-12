@@ -1,0 +1,5 @@
+
+> metadata-crm-platform@1.0.0 start
+> node src/app.js
+
+Connected to SQL Server

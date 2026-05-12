@@ -93,6 +93,33 @@ class FormRepository {
             `);
         return result.recordset.map((row) => ({ ...row, definition: JSON.parse(row.definitionjson) }));
     }
+
+    async listAllForms() {
+        await ensureAppMetadataSchema();
+        const pool = await poolPromise;
+        const result = await pool.request().query(`
+            SELECT f.*, e.logicalname AS entitylogicalname
+            FROM FormMetadata f
+            JOIN EntityMetadata e ON f.entityid = e.entityid
+            ORDER BY f.modifiedon DESC, f.createdon DESC
+        `);
+        return result.recordset.map((row) => ({ ...row, definition: JSON.parse(row.definitionjson) }));
+    }
+
+    async getFormById(formId) {
+        await ensureAppMetadataSchema();
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('formid', sql.UniqueIdentifier, formId)
+            .query(`
+                SELECT f.*, e.logicalname AS entitylogicalname
+                FROM FormMetadata f
+                JOIN EntityMetadata e ON f.entityid = e.entityid
+                WHERE f.formid = @formid
+            `);
+        const row = result.recordset[0];
+        return row ? { ...row, definition: JSON.parse(row.definitionjson) } : null;
+    }
 }
 
 module.exports = new FormRepository();

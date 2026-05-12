@@ -2,6 +2,10 @@ const IMetadataService = require('../interfaces/IMetadataService');
 const metadataRepository = require('../repositories/metadataRepository');
 const metadataCache = require('../utils/metadataCache');
 const EntityNotFoundException = require('../exceptions/EntityNotFoundException');
+const ValidationException = require('../exceptions/ValidationException');
+const { getCoreEntityDefinition, getCoreEntitiesList } = require('../constants/coreSalesMetadata');
+
+const PROTECTED_ENTITY_NAMES = new Set(['account', 'contact']);
 
 class MetadataService extends IMetadataService {
     async createEntity(entityData) {
@@ -36,7 +40,12 @@ class MetadataService extends IMetadataService {
 
         const entity = await metadataRepository.getEntityMetadata(logicalName);
         if (!entity) {
-            throw new EntityNotFoundException(logicalName);
+            const coreDefinition = getCoreEntityDefinition(logicalName);
+            if (!coreDefinition) {
+                throw new EntityNotFoundException(logicalName);
+            }
+            metadataCache.setEntityMap(logicalName, coreDefinition);
+            return coreDefinition;
         }
 
         const attributes = await metadataRepository.getAttributesMetadata(entity.entityid);
@@ -58,10 +67,19 @@ class MetadataService extends IMetadataService {
     }
 
     async getAllEntities() {
-        return await metadataRepository.getAllEntitiesMetadata();
+        const databaseEntities = await metadataRepository.getAllEntitiesMetadata();
+        const existing = new Set(databaseEntities.map((entity) => String(entity.logicalname || '').toLowerCase()));
+        const coreEntities = getCoreEntitiesList().filter((entity) => !existing.has(entity.logicalname));
+        return [...databaseEntities, ...coreEntities].sort((left, right) =>
+            String(left.logicalname || '').localeCompare(String(right.logicalname || ''))
+        );
     }
 
     async deleteEntity(logicalname) {
+        const normalized = String(logicalname || '').toLowerCase();
+        if (PROTECTED_ENTITY_NAMES.has(normalized)) {
+            throw new ValidationException(`Entity '${normalized}' is protected and cannot be deleted.`);
+        }
         metadataCache.invalidateEntity(logicalname);
         await metadataRepository.deleteEntityByLogicalName(logicalname);
     }
