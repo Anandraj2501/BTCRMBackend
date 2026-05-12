@@ -39,7 +39,7 @@ class EntityService extends IEntityService {
         return def;
     }
 
-    async createRecord(logicalName, data) {
+    async createRecord(logicalName, data, appId = null) {
         if (String(logicalName || '').toLowerCase() === 'cases') {
             const caseService = require('./caseService');
             const record = await caseService.createCase(data);
@@ -48,21 +48,29 @@ class EntityService extends IEntityService {
 
         const def = await this.validateMetadata(logicalName, data);
         const hasBaseEntity = def.metadata.iscustomentity === 1 || def.attributeMap['baseentityid'] !== undefined;
-        return await entityRepository.createRecord(logicalName, data, def.metadata.primaryidattribute, hasBaseEntity);
+        return await entityRepository.createRecord(logicalName, data, def.metadata.primaryidattribute, hasBaseEntity, appId);
     }
 
-    async getRecords(logicalName) {
+    async getRecords(logicalName, appId = null, viewId = null) {
         const def = await metadataService.getEntityDefinition(logicalName);
         const hasBaseEntity = def.metadata.iscustomentity === 1 || def.attributeMap['baseentityid'] !== undefined;
-        return await entityRepository.getRecords(logicalName, hasBaseEntity);
+        let filters = [];
+        if (viewId) {
+            const viewRepository = require('../repositories/viewRepository');
+            const view = await viewRepository.getViewById(viewId);
+            if (view && view.definition && view.definition.filters) {
+                filters = view.definition.filters;
+            }
+        }
+        return await entityRepository.getRecords(logicalName, hasBaseEntity, appId, filters);
     }
 
-    async getRecordById(logicalName, id) {
+    async getRecordById(logicalName, id, appId = null) {
         id = requireGuid(id, 'Record id');
         const def = await metadataService.getEntityDefinition(logicalName);
         const hasBaseEntity = def.metadata.iscustomentity === 1 || def.attributeMap['baseentityid'] !== undefined;
         
-        const record = await entityRepository.getRecordById(logicalName, def.metadata.primaryidattribute, id, hasBaseEntity);
+        const record = await entityRepository.getRecordById(logicalName, def.metadata.primaryidattribute, id, hasBaseEntity, appId);
         if (!record) throw new NotFoundException();
         return record;
     }
@@ -98,10 +106,10 @@ class EntityService extends IEntityService {
         }
     }
 
-    async searchRecords(logicalName, query) {
+    async searchRecords(logicalName, query, appId = null) {
         const def = await metadataService.getEntityDefinition(logicalName);
         const primaryName = def.metadata.primarynameattribute || 'name';
-        return await entityRepository.searchRecords(logicalName, primaryName, query);
+        return await entityRepository.searchRecords(logicalName, primaryName, query, appId);
     }
 
     async getRecordsByView(logicalName, viewId) {

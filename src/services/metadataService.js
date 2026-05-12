@@ -4,12 +4,19 @@ const metadataCache = require('../utils/metadataCache');
 const EntityNotFoundException = require('../exceptions/EntityNotFoundException');
 const ValidationException = require('../exceptions/ValidationException');
 const { getCoreEntityDefinition, getCoreEntitiesList } = require('../constants/coreSalesMetadata');
+const viewRepository = require('../repositories/viewRepository');
 
 const PROTECTED_ENTITY_NAMES = new Set(['account', 'contact']);
 
 class MetadataService extends IMetadataService {
     async createEntity(entityData) {
         await metadataRepository.executeCreateEntitySp(entityData);
+        // Seed default views for the new entity
+        await viewRepository.seedDefaultViews(
+            entityData.logicalname, 
+            entityData.displayname, 
+            entityData.primarynameattribute || 'name'
+        );
         metadataCache.invalidateEntity(entityData.logicalname);
     }
 

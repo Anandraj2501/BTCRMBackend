@@ -44,14 +44,16 @@ class SchemaController {
     // ─── Views ────────────────────────────────────────────────────
     async saveView(req, res, next) {
         try {
-            await viewService.saveView(req.body);
+            const ownerid = req.headers['x-user-id'] || 'current-user-1';
+            await viewService.saveView({ ...req.body, ownerid });
             res.status(201).json(ApiResponse.success('View saved successfully.'));
         } catch (err) { next(err); }
     }
 
     async getViews(req, res, next) {
         try {
-            const data = await viewService.getViewsForEntity(req.params.logicalname, req.query.appId || null);
+            const ownerid = req.headers['x-user-id'] || 'current-user-1';
+            const data = await viewService.getViewsForEntity(req.params.logicalname, req.query.appId || null, ownerid);
             res.json(ApiResponse.success(null, data));
         } catch (err) { next(err); }
     }

@@ -8,8 +8,8 @@ class ViewService {
         return await viewRepository.saveView(data);
     }
 
-    async getViewsForEntity(logicalName, appId = null) {
-        return await viewRepository.getViewsForEntity(logicalName, appId);
+    async getViewsForEntity(logicalName, appId = null, ownerid = null) {
+        return await viewRepository.getViewsForEntity(logicalName, appId, { ownerid });
     }
 
     async getDefaultView(logicalName, appId = null) {

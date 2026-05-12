@@ -3,12 +3,12 @@ const { sql, poolPromise } = require('../config/db');
 const QueryBuilder = require('../utils/queryBuilder');
 
 class EntityRepository extends IEntityRepository {
-    async createBaseEntity(transaction, logicalName, ownerId) {
+    async createBaseEntity(transaction, logicalName, ownerId, appId = null) {
         const req = new sql.Request(transaction);
-        const result = await req
-            .input('logicalname', sql.NVarChar(100), logicalName)
-            .input('ownerid', sql.UniqueIdentifier, ownerId)
-            .query(QueryBuilder.buildBaseEntityInsertQuery());
+        req.input('logicalname', sql.NVarChar(100), logicalName);
+        req.input('ownerid', sql.UniqueIdentifier, ownerId);
+        if (appId) req.input('appid', sql.UniqueIdentifier, appId);
+        const result = await req.query(QueryBuilder.buildBaseEntityInsertQuery(appId));
         return result.recordset[0].baseentityid;
     }
 
@@ -28,7 +28,7 @@ class EntityRepository extends IEntityRepository {
         } catch { return new Set(); }
     }
 
-    async createRecord(logicalName, data, primaryIdKey, hasBaseEntity) {
+    async createRecord(logicalName, data, primaryIdKey, hasBaseEntity, appId = null) {
         const pool = await poolPromise;
         const transaction = new sql.Transaction(pool);
         await transaction.begin();
@@ -37,7 +37,7 @@ class EntityRepository extends IEntityRepository {
             let baseEntityId = null;
             if (hasBaseEntity) {
                 const ownerId = data.ownerid || '00000000-0000-0000-0000-000000000000';
-                baseEntityId = await this.createBaseEntity(transaction, logicalName, ownerId);
+                baseEntityId = await this.createBaseEntity(transaction, logicalName, ownerId, appId);
             }
 
             // Strip computed columns so SQL Server doesn't reject the INSERT
@@ -72,29 +72,38 @@ class EntityRepository extends IEntityRepository {
         }
     }
 
-    async getRecords(logicalName, hasBaseEntity) {
+    async getRecords(logicalName, hasBaseEntity, appId = null, filters = []) {
         const pool = await poolPromise;
         let query;
         if (hasBaseEntity) {
-            query = QueryBuilder.buildSelectQuery(logicalName);
+            query = QueryBuilder.buildSelectQuery(logicalName, [], appId, filters);
         } else {
+            // Very simple fallback for non-base entities
             query = `SELECT * FROM [${logicalName}]`;
         }
-        const result = await pool.request().query(query);
+        const req = pool.request();
+        if (hasBaseEntity && appId) req.input('appid', sql.UniqueIdentifier, appId);
+        
+        // Parameterize filters
+        filters.forEach((f, i) => {
+            req.input(`filterValue${i}`, f.value);
+        });
+
+        const result = await req.query(query);
         return result.recordset;
     }
 
-    async getRecordById(logicalName, primaryIdKey, id, hasBaseEntity) {
+    async getRecordById(logicalName, primaryIdKey, id, hasBaseEntity, appId = null) {
         const pool = await poolPromise;
         let query;
         if (hasBaseEntity) {
-            query = QueryBuilder.buildSelectQuery(logicalName, [{ column: primaryIdKey, param: 'id' }]);
+            query = QueryBuilder.buildSelectQuery(logicalName, [{ column: primaryIdKey, param: 'id' }], appId);
         } else {
             query = `SELECT * FROM [${logicalName}] WHERE [${primaryIdKey}] = @id`;
         }
-        const result = await pool.request()
-            .input('id', sql.UniqueIdentifier, id)
-            .query(query);
+        const req = pool.request().input('id', sql.UniqueIdentifier, id);
+        if (hasBaseEntity && appId) req.input('appid', sql.UniqueIdentifier, appId);
+        const result = await req.query(query);
         return result.recordset[0] || null;
     }
 
@@ -167,13 +176,22 @@ class EntityRepository extends IEntityRepository {
         return result.recordset.length > 0 ? result.recordset[0].baseentityid : null;
     }
 
-    async searchRecords(logicalName, primaryNameAttribute, query) {
+    async searchRecords(logicalName, primaryNameAttribute, query, appId = null) {
         const pool = await poolPromise;
         const safeTable = `[${logicalName}]`;
         const safeNameCol = `[${primaryNameAttribute}]`;
-        const result = await pool.request()
-            .input('q', sql.NVarChar(255), `%${query}%`)
-            .query(`SELECT TOP 20 * FROM ${safeTable} WHERE ${safeNameCol} LIKE @q`);
+        let sql_query;
+        const req = pool.request().input('q', sql.NVarChar(255), `%${query}%`);
+
+        if (appId) {
+            req.input('appid', sql.UniqueIdentifier, appId);
+            // Join through BaseEntity so we can filter by appid
+            sql_query = `SELECT TOP 20 t.* FROM ${safeTable} t JOIN BaseEntity b ON t.baseentityid = b.baseentityid WHERE ${safeNameCol} LIKE @q AND b.statecode = 0 AND (b.appid = @appid OR b.appid IS NULL)`;
+        } else {
+            sql_query = `SELECT TOP 20 * FROM ${safeTable} WHERE ${safeNameCol} LIKE @q`;
+        }
+
+        const result = await req.query(sql_query);
         return result.recordset;
     }
 
