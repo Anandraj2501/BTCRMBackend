@@ -44,7 +44,7 @@ class SchemaController {
     // ─── Views ────────────────────────────────────────────────────
     async saveView(req, res, next) {
         try {
-            const ownerid = req.headers['x-user-id'] || 'current-user-1';
+            const ownerid = req.user?.id || req.headers['x-user-id'] || '00000000-0000-0000-0000-000000000001';
             await viewService.saveView({ ...req.body, ownerid });
             res.status(201).json(ApiResponse.success('View saved successfully.'));
         } catch (err) { next(err); }
@@ -52,7 +52,7 @@ class SchemaController {
 
     async getViews(req, res, next) {
         try {
-            const ownerid = req.headers['x-user-id'] || 'current-user-1';
+            const ownerid = req.user?.id || req.headers['x-user-id'] || '00000000-0000-0000-0000-000000000001';
             const data = await viewService.getViewsForEntity(req.params.logicalname, req.query.appId || null, ownerid);
             res.json(ApiResponse.success(null, data));
         } catch (err) { next(err); }

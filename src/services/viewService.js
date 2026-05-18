@@ -9,11 +9,11 @@ class ViewService {
     }
 
     async getViewsForEntity(logicalName, appId = null, ownerid = null) {
-        return await viewRepository.getViewsForEntity(logicalName, appId, { ownerid });
+        return await viewRepository.getViewsForEntity(logicalName, { ownerid });
     }
 
     async getDefaultView(logicalName, appId = null) {
-        return await viewRepository.getDefaultView(logicalName, appId);
+        return await viewRepository.getDefaultView(logicalName);
     }
 }
 

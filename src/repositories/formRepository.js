@@ -6,7 +6,6 @@ class FormRepository {
         await ensureAppMetadataSchema();
         const pool = await poolPromise;
         await pool.request()
-            .input('appid', sql.UniqueIdentifier, data.appid || null)
             .input('entitylogicalname', sql.NVarChar(100), data.entitylogicalname)
             .input('formname', sql.NVarChar(255), data.formname)
             .input('formkey', sql.NVarChar(100), data.formkey || data.id || 'main')
@@ -19,59 +18,58 @@ class FormRepository {
                 IF @isdefault = 1
                     UPDATE FormMetadata SET isdefault = 0
                     WHERE entityid = @entityId
-                      AND ((appid = @appid) OR (appid IS NULL AND @appid IS NULL));
+                      AND appid IS NULL;
 
                 IF EXISTS (
                     SELECT 1 FROM FormMetadata
                     WHERE entityid = @entityId
                       AND formkey = @formkey
-                      AND ((appid = @appid) OR (appid IS NULL AND @appid IS NULL))
+                      AND appid IS NULL
                 )
                 BEGIN
                     UPDATE FormMetadata
                     SET formname = @formname,
                         isdefault = @isdefault,
                         definitionjson = @definitionjson,
+                        appid = NULL,
                         modifiedon = GETDATE()
                     WHERE entityid = @entityId
                       AND formkey = @formkey
-                      AND ((appid = @appid) OR (appid IS NULL AND @appid IS NULL));
+                      AND appid IS NULL;
                 END
                 ELSE
                 BEGIN
                     INSERT INTO FormMetadata (appid, entityid, formkey, formname, isdefault, definitionjson)
-                    VALUES (@appid, @entityId, @formkey, @formname, @isdefault, @definitionjson);
+                    VALUES (NULL, @entityId, @formkey, @formname, @isdefault, @definitionjson);
                 END
             `);
     }
 
-    async getFormsForEntity(logicalName, appId = null) {
+    async getFormsForEntity(logicalName) {
         await ensureAppMetadataSchema();
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('appid', sql.UniqueIdentifier, appId)
             .input('logicalname', sql.NVarChar(100), logicalName)
             .query(`
                 SELECT f.* FROM FormMetadata f
                 JOIN EntityMetadata e ON f.entityid = e.entityid
                 WHERE e.logicalname = @logicalname
-                  AND (@appid IS NULL OR f.appid = @appid)
+                  AND f.appid IS NULL
                 ORDER BY f.isdefault DESC, f.createdon DESC
             `);
         return result.recordset.map((row) => ({ ...row, definition: JSON.parse(row.definitionjson) }));
     }
 
-    async getDefaultForm(logicalName, appId = null) {
+    async getDefaultForm(logicalName) {
         await ensureAppMetadataSchema();
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('appid', sql.UniqueIdentifier, appId)
             .input('logicalname', sql.NVarChar(100), logicalName)
             .query(`
                 SELECT TOP 1 f.* FROM FormMetadata f
                 JOIN EntityMetadata e ON f.entityid = e.entityid
                 WHERE e.logicalname = @logicalname
-                  AND (@appid IS NULL OR f.appid = @appid)
+                  AND f.appid IS NULL
                 ORDER BY f.isdefault DESC, f.createdon DESC
             `);
         const row = result.recordset[0];
@@ -79,16 +77,25 @@ class FormRepository {
         return { ...row, definition: JSON.parse(row.definitionjson) };
     }
 
-    async getFormsForApp(appId) {
+    async getFormsForEntities(entityNames = []) {
         await ensureAppMetadataSchema();
+        if (!Array.isArray(entityNames) || entityNames.length === 0) {
+            return [];
+        }
         const pool = await poolPromise;
-        const result = await pool.request()
-            .input('appid', sql.UniqueIdentifier, appId)
+        const request = pool.request();
+        const params = entityNames.map((logicalName, index) => {
+            const name = `logicalname${index}`;
+            request.input(name, sql.NVarChar(100), logicalName);
+            return `@${name}`;
+        });
+        const result = await request
             .query(`
                 SELECT f.*, e.logicalname AS entitylogicalname
                 FROM FormMetadata f
                 JOIN EntityMetadata e ON f.entityid = e.entityid
-                WHERE f.appid = @appid
+                WHERE e.logicalname IN (${params.join(', ')})
+                  AND f.appid IS NULL
                 ORDER BY f.isdefault DESC, f.createdon DESC
             `);
         return result.recordset.map((row) => ({ ...row, definition: JSON.parse(row.definitionjson) }));

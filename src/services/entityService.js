@@ -48,21 +48,29 @@ class EntityService extends IEntityService {
 
         const def = await this.validateMetadata(logicalName, data);
         const hasBaseEntity = def.metadata.iscustomentity === 1 || def.attributeMap['baseentityid'] !== undefined;
-        return await entityRepository.createRecord(logicalName, data, def.metadata.primaryidattribute, hasBaseEntity, appId);
+        return await entityRepository.createRecord(logicalName, data, def.metadata.primaryidattribute, hasBaseEntity);
     }
 
     async getRecords(logicalName, appId = null, viewId = null) {
         const def = await metadataService.getEntityDefinition(logicalName);
         const hasBaseEntity = def.metadata.iscustomentity === 1 || def.attributeMap['baseentityid'] !== undefined;
         let filters = [];
+        
         if (viewId) {
             const viewRepository = require('../repositories/viewRepository');
-            const view = await viewRepository.getViewById(viewId);
+            let view = null;
+            
+            if (viewId === 'active') {
+                view = await viewRepository.getDefaultView(logicalName, appId);
+            } else if (isGuid(viewId)) {
+                view = await viewRepository.getViewById(viewId);
+            }
+
             if (view && view.definition && view.definition.filters) {
                 filters = view.definition.filters;
             }
         }
-        return await entityRepository.getRecords(logicalName, hasBaseEntity, appId, filters);
+        return await entityRepository.getRecords(logicalName, hasBaseEntity, filters);
     }
 
     async getRecordById(logicalName, id, appId = null) {
@@ -70,7 +78,7 @@ class EntityService extends IEntityService {
         const def = await metadataService.getEntityDefinition(logicalName);
         const hasBaseEntity = def.metadata.iscustomentity === 1 || def.attributeMap['baseentityid'] !== undefined;
         
-        const record = await entityRepository.getRecordById(logicalName, def.metadata.primaryidattribute, id, hasBaseEntity, appId);
+        const record = await entityRepository.getRecordById(logicalName, def.metadata.primaryidattribute, id, hasBaseEntity);
         if (!record) throw new NotFoundException();
         return record;
     }
@@ -109,15 +117,12 @@ class EntityService extends IEntityService {
     async searchRecords(logicalName, query, appId = null) {
         const def = await metadataService.getEntityDefinition(logicalName);
         const primaryName = def.metadata.primarynameattribute || 'name';
-        return await entityRepository.searchRecords(logicalName, primaryName, query, appId);
+        return await entityRepository.searchRecords(logicalName, primaryName, query);
     }
 
     async getRecordsByView(logicalName, viewId) {
         viewId = requireGuid(viewId, 'View id');
-        const viewRepository = require('../repositories/viewRepository');
-        const view = await viewRepository.getViewById(viewId);
-        if (!view) throw new (require('../exceptions/NotFoundException'))(`View ${viewId} not found`);
-        return await entityRepository.getRecordsByView(logicalName, view.definition);
+        return await this.getRecords(logicalName, null, viewId);
     }
 }
 

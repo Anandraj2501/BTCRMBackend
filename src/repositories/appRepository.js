@@ -122,8 +122,6 @@ class AppRepository {
         await pool.request()
             .input('appid', sql.UniqueIdentifier, appId)
             .query(`
-                DELETE FROM FormMetadata WHERE appid = @appid;
-                DELETE FROM ViewMetadata WHERE appid = @appid;
                 DELETE FROM AppMetadata WHERE appid = @appid;
             `);
     }

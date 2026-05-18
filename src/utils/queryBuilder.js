@@ -9,16 +9,10 @@ class QueryBuilder {
      * Build a SELECT query that joins through BaseEntity.
      * @param {string} logicalName - The entity table name.
      * @param {Array<{column:string, param:string}>} whereClauses - Extra WHERE conditions on the entity table.
-     * @param {string|null} appId - When provided, filters to records that belong to this app (or have no app set).
      * @param {Array<Object>} filters - Array of filter objects {field, operator, value}
      */
-    static buildSelectQuery(logicalName, whereClauses = [], appId = null, filters = []) {
+    static buildSelectQuery(logicalName, whereClauses = [], filters = []) {
         let query = `SELECT t.* FROM [${logicalName}] t JOIN BaseEntity b ON t.baseentityid = b.baseentityid WHERE b.statecode = 0`;
-
-        if (appId) {
-            // Show records that either belong to this app, or have no appid (legacy rows)
-            query += ` AND (b.appid = @appid OR b.appid IS NULL)`;
-        }
 
         if (whereClauses.length > 0) {
             whereClauses.forEach(w => {
@@ -50,12 +44,8 @@ class QueryBuilder {
     }
 
     /**
-     * @param {string|null} appId - If provided, stores the owning app on the new base entity row.
      */
-    static buildBaseEntityInsertQuery(appId = null) {
-        if (appId) {
-            return `INSERT INTO BaseEntity (baseentityid, logicalname, ownerid, appid, createdon, modifiedon, statecode, statuscode) OUTPUT INSERTED.baseentityid VALUES (NEWID(), @logicalname, @ownerid, @appid, GETDATE(), GETDATE(), 0, 1)`;
-        }
+    static buildBaseEntityInsertQuery() {
         return `INSERT INTO BaseEntity (baseentityid, logicalname, ownerid, createdon, modifiedon, statecode, statuscode) OUTPUT INSERTED.baseentityid VALUES (NEWID(), @logicalname, @ownerid, GETDATE(), GETDATE(), 0, 1)`;
     }
 

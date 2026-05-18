@@ -6,7 +6,6 @@ class ViewRepository {
         await ensureAppMetadataSchema();
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('appid', sql.UniqueIdentifier, data.appid || null)
             .input('entitylogicalname', sql.NVarChar(100), data.entitylogicalname)
             .input('viewname', sql.NVarChar(255), data.viewname)
             .input('viewkey', sql.NVarChar(100), data.viewkey || data.id || 'active')
@@ -23,13 +22,13 @@ class ViewRepository {
                 IF @isdefault = 1
                     UPDATE ViewMetadata SET isdefault = 0
                     WHERE entityid = @entityId
-                      AND ((appid = @appid) OR (appid IS NULL AND @appid IS NULL));
+                      AND appid IS NULL;
 
                 IF EXISTS (
                     SELECT 1 FROM ViewMetadata
                     WHERE entityid = @entityId
                       AND viewkey = @viewkey
-                      AND ((appid = @appid) OR (appid IS NULL AND @appid IS NULL))
+                      AND appid IS NULL
                 )
                 BEGIN
                     UPDATE ViewMetadata
@@ -41,38 +40,38 @@ class ViewRepository {
                         iscustomizable = @iscustomizable,
                         status = @status,
                         definitionjson = @definitionjson,
+                        appid = NULL,
                         modifiedon = GETDATE()
                     WHERE entityid = @entityId
                       AND viewkey = @viewkey
-                      AND ((appid = @appid) OR (appid IS NULL AND @appid IS NULL));
+                      AND appid IS NULL;
 
                     SELECT TOP 1 viewid FROM ViewMetadata
                     WHERE entityid = @entityId
                       AND viewkey = @viewkey
-                      AND ((appid = @appid) OR (appid IS NULL AND @appid IS NULL));
+                      AND appid IS NULL;
                 END
                 ELSE
                 BEGIN
                     INSERT INTO ViewMetadata (appid, entityid, viewkey, viewname, isdefault, viewtype, ownerid, ismanaged, iscustomizable, status, definitionjson)
                     OUTPUT INSERTED.viewid
-                    VALUES (@appid, @entityId, @viewkey, @viewname, @isdefault, @viewtype, @ownerid, @ismanaged, @iscustomizable, @status, @definitionjson);
+                    VALUES (NULL, @entityId, @viewkey, @viewname, @isdefault, @viewtype, @ownerid, @ismanaged, @iscustomizable, @status, @definitionjson);
                 END
             `);
         return result.recordset[0];
     }
 
-    async getViewsForEntity(logicalName, appId = null, data = {}) {
+    async getViewsForEntity(logicalName, data = {}) {
         await ensureAppMetadataSchema();
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('appid', sql.UniqueIdentifier, appId)
             .input('logicalname', sql.NVarChar(100), logicalName)
             .input('ownerid', sql.NVarChar(100), data?.ownerid || null)
             .query(`
                 SELECT v.* FROM ViewMetadata v
                 JOIN EntityMetadata e ON v.entityid = e.entityid
                 WHERE e.logicalname = @logicalname
-                  AND (@appid IS NULL OR v.appid = @appid)
+                  AND v.appid IS NULL
                   AND (v.viewtype <> 'Personal' OR v.ownerid = @ownerid)
                 ORDER BY v.isdefault DESC, v.createdon DESC
             `);
@@ -114,17 +113,16 @@ class ViewRepository {
         }
     }
 
-    async getDefaultView(logicalName, appId = null) {
+    async getDefaultView(logicalName) {
         await ensureAppMetadataSchema();
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('appid', sql.UniqueIdentifier, appId)
             .input('logicalname', sql.NVarChar(100), logicalName)
             .query(`
                 SELECT TOP 1 v.* FROM ViewMetadata v
                 JOIN EntityMetadata e ON v.entityid = e.entityid
                 WHERE e.logicalname = @logicalname
-                  AND (@appid IS NULL OR v.appid = @appid)
+                  AND v.appid IS NULL
                 ORDER BY v.isdefault DESC, v.createdon DESC
             `);
         const row = result.recordset[0];
@@ -143,16 +141,25 @@ class ViewRepository {
         return { ...row, definition: JSON.parse(row.definitionjson) };
     }
 
-    async getViewsForApp(appId) {
+    async getViewsForEntities(entityNames = []) {
         await ensureAppMetadataSchema();
+        if (!Array.isArray(entityNames) || entityNames.length === 0) {
+            return [];
+        }
         const pool = await poolPromise;
-        const result = await pool.request()
-            .input('appid', sql.UniqueIdentifier, appId)
+        const request = pool.request();
+        const params = entityNames.map((logicalName, index) => {
+            const name = `logicalname${index}`;
+            request.input(name, sql.NVarChar(100), logicalName);
+            return `@${name}`;
+        });
+        const result = await request
             .query(`
                 SELECT v.*, e.logicalname AS entitylogicalname
                 FROM ViewMetadata v
                 JOIN EntityMetadata e ON v.entityid = e.entityid
-                WHERE v.appid = @appid
+                WHERE e.logicalname IN (${params.join(', ')})
+                  AND v.appid IS NULL
                 ORDER BY v.isdefault DESC, v.createdon DESC
             `);
         return result.recordset.map((row) => ({ ...row, definition: JSON.parse(row.definitionjson) }));

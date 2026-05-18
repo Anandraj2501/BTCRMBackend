@@ -40,8 +40,10 @@ class AppService {
     async getAppBundle(appId) {
         try {
             const app = await appRepository.getApp(appId);
-            const forms = await formRepository.getFormsForApp(appId);
-            const views = await viewRepository.getViewsForApp(appId);
+            const appPayload = app?.draft?.payload || app?.published?.payload || null;
+            const entities = Array.isArray(appPayload?.entities) ? appPayload.entities : [];
+            const forms = await formRepository.getFormsForEntities(entities);
+            const views = await viewRepository.getViewsForEntities(entities);
             return { app, forms, views };
         } catch (error) {
             throw mapAppMetadataError(error);
