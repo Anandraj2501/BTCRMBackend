@@ -119,11 +119,19 @@ class AppRepository {
     async deleteApp(appId) {
         await ensureAppMetadataSchema();
         const pool = await poolPromise;
+        // msnodesqlv8 does not support multiple statements in a single query,
+        // so we send each DELETE as a separate request in dependency order.
         await pool.request()
             .input('appid', sql.UniqueIdentifier, appId)
-            .query(`
-                DELETE FROM AppMetadata WHERE appid = @appid;
-            `);
+            .query(`DELETE FROM FormMetadata WHERE appid = @appid`);
+
+        await pool.request()
+            .input('appid', sql.UniqueIdentifier, appId)
+            .query(`DELETE FROM ViewMetadata WHERE appid = @appid`);
+
+        await pool.request()
+            .input('appid', sql.UniqueIdentifier, appId)
+            .query(`DELETE FROM AppMetadata WHERE appid = @appid`);
     }
 }
 

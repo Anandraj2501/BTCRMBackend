@@ -6,7 +6,7 @@ const ValidationException = require('../exceptions/ValidationException');
 const { getCoreEntityDefinition, getCoreEntitiesList } = require('../constants/coreSalesMetadata');
 const viewRepository = require('../repositories/viewRepository');
 
-const PROTECTED_ENTITY_NAMES = new Set(['account', 'contact']);
+const PROTECTED_ENTITY_NAMES = new Set(['account', 'case', 'contact', 'sla']);
 
 class MetadataService extends IMetadataService {
     async createEntity(entityData) {

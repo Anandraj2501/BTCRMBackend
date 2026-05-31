@@ -12,7 +12,7 @@ class QueryBuilder {
      * @param {Array<Object>} filters - Array of filter objects {field, operator, value}
      */
     static buildSelectQuery(logicalName, whereClauses = [], filters = []) {
-        let query = `SELECT t.* FROM [${logicalName}] t JOIN BaseEntity b ON t.baseentityid = b.baseentityid WHERE b.statecode = 0`;
+        let query = `SELECT t.*, b.createdon, b.modifiedon, b.ownerid, b.statecode, b.statuscode, CASE WHEN b.statuscode = 1 THEN 'Active' ELSE 'Inactive' END as status FROM [${logicalName}] t JOIN BaseEntity b ON t.baseentityid = b.baseentityid WHERE b.statecode = 0`;
 
         if (whereClauses.length > 0) {
             whereClauses.forEach(w => {
